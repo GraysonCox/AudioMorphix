@@ -32,19 +32,19 @@ class MusicFeaturePredictor:
         self.beats_model.load_state_dict(beats_weight)
 
         self.chords_tokenizer = AutoTokenizer.from_pretrained(
-            "google/flan-t5-large",
+            "google/flan-t5-small",
             cache_dir=cache_dir,
             local_files_only=local_files_only,
         )
         self.chords_model = T5ForConditionalGeneration.from_pretrained(
-            "google/flan-t5-large",
+            "google/flan-t5-small",
             cache_dir=cache_dir,
             local_files_only=local_files_only,
         )
         self.chords_model.eval()
         self.chords_model.to(device)
 
-        chords_ckpt = f"{path}/chords/flan-t5-large.bin"
+        chords_ckpt = f"{path}/chords/flan-t5-small.bin"
         chords_weight = torch.load(chords_ckpt, map_location="cpu")
         self.chords_model.load_state_dict(chords_weight)
 
