@@ -32,25 +32,25 @@ dump_config(cfgs, dump_path=os.path.join(output_dir, "trial_config.yaml"))
 log.info(f"Set the output of the trial to {output_dir}")
 
 # Setup Wandb
-wandb.login(key=os.environ["WANDB_API_KEY"])
-wandb_tags = [
-    f"guidance_scale: {cfgs.task.guidance_scale}",
-    f"energy_scale: {cfgs.task.energy_scale}",
-    f"w_edit: {cfgs.task.w_edit}",
-    f"w_content: {cfgs.task.w_content}",
-    f"sde_strength: {cfgs.task.sde_strength}",
-]
-wandb_run = wandb.init(
-    project="eval_AudioMorphix",
-    name=trial_name,
-    group=cfgs.wandb_group,
-    tags=wandb_tags,
-    mode="disabled" if cfgs.wandb_disable else "online",
-    settings=wandb.Settings(_disable_stats=True),
-    job_type=cfgs.task.task,
-    config=OmegaConf.to_object(cfgs),
-    dir=output_dir,
-)
+# wandb.login(key=os.environ["WANDB_API_KEY"])
+# wandb_tags = [
+#     f"guidance_scale: {cfgs.task.guidance_scale}",
+#     f"energy_scale: {cfgs.task.energy_scale}",
+#     f"w_edit: {cfgs.task.w_edit}",
+#     f"w_content: {cfgs.task.w_content}",
+#     f"sde_strength: {cfgs.task.sde_strength}",
+# ]
+# wandb_run = wandb.init(
+#     project="eval_AudioMorphix",
+#     name=trial_name,
+#     group=cfgs.wandb_group,
+#     tags=wandb_tags,
+#     mode="disabled" if cfgs.wandb_disable else "online",
+#     settings=wandb.Settings(_disable_stats=True),
+#     job_type=cfgs.task.task,
+#     config=OmegaConf.to_object(cfgs),
+#     dir=output_dir,
+# )
 
 
 model = AudioMorphix(
@@ -239,59 +239,59 @@ if isinstance(edited_wav, np.ndarray):  # tango
 else:
     edited_wav = edited_wav.cpu().squeeze().numpy()
 
-
-wandb.log(
-    {
-        "background_wav": wandb.Audio(
-            wav_bg.cpu().squeeze().numpy(),
-            caption=cfgs.task.background_audio_caption,
-            sample_rate=cfgs.audio_processor.sampling_rate,
-        ),
-        "background_spec": wandb.Image(
-            plot_spectrogram(
-                fbank_bg.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec]
-            ),  # discard padding area
-            caption=cfgs.task.background_audio_caption,
-        ),
-        "background_mask": wandb.Image(
-            plot_spectrogram(
-                mask_bg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
-            ),
-            caption="Mask of background sound",
-        ),
-        "foreground_wav": wandb.Audio(
-            wav_fg.cpu().squeeze().numpy(),
-            caption=cfgs.task.foreground_audio_caption,
-            sample_rate=cfgs.audio_processor.sampling_rate,
-        ),
-        "foreground_spec": wandb.Image(
-            plot_spectrogram(
-                fbank_fg_ori.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec],
-                filename="out.png",
-            ),
-            caption=cfgs.task.foreground_audio_caption,
-        ),
-        "foreground_mask": wandb.Image(
-            plot_spectrogram(
-                mask_fg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
-            ),
-            caption="Mask of foreground sound",
-        ),
-        "generated_wav": wandb.Audio(
-            edited_wav,
-            caption="After adding foreground sound.",
-            sample_rate=cfgs.audio_processor.sampling_rate,
-        ),
-        "generated_spec": wandb.Image(
-            plot_spectrogram(
-                result.mel_spectrogram.permute(0, 1, 3, 2)[
-                    :, :, :, : 10 * n_sample_per_sec
-                ]
-            ),
-            caption="After adding foreground sound.",
-        ),
-    }
-)
+#
+# wandb.log(
+#     {
+#         "background_wav": wandb.Audio(
+#             wav_bg.cpu().squeeze().numpy(),
+#             caption=cfgs.task.background_audio_caption,
+#             sample_rate=cfgs.audio_processor.sampling_rate,
+#         ),
+#         "background_spec": wandb.Image(
+#             plot_spectrogram(
+#                 fbank_bg.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec]
+#             ),  # discard padding area
+#             caption=cfgs.task.background_audio_caption,
+#         ),
+#         "background_mask": wandb.Image(
+#             plot_spectrogram(
+#                 mask_bg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
+#             ),
+#             caption="Mask of background sound",
+#         ),
+#         "foreground_wav": wandb.Audio(
+#             wav_fg.cpu().squeeze().numpy(),
+#             caption=cfgs.task.foreground_audio_caption,
+#             sample_rate=cfgs.audio_processor.sampling_rate,
+#         ),
+#         "foreground_spec": wandb.Image(
+#             plot_spectrogram(
+#                 fbank_fg_ori.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec],
+#                 filename="out.png",
+#             ),
+#             caption=cfgs.task.foreground_audio_caption,
+#         ),
+#         "foreground_mask": wandb.Image(
+#             plot_spectrogram(
+#                 mask_fg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
+#             ),
+#             caption="Mask of foreground sound",
+#         ),
+#         "generated_wav": wandb.Audio(
+#             edited_wav,
+#             caption="After adding foreground sound.",
+#             sample_rate=cfgs.audio_processor.sampling_rate,
+#         ),
+#         "generated_spec": wandb.Image(
+#             plot_spectrogram(
+#                 result.mel_spectrogram.permute(0, 1, 3, 2)[
+#                     :, :, :, : 10 * n_sample_per_sec
+#                 ]
+#             ),
+#             caption="After adding foreground sound.",
+#         ),
+#     }
+# )
 
 
 # if cfgs.task.output_audio_filepath is not None:
