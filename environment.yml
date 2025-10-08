@@ -1,0 +1,29 @@
+name: audiomorphix
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - ffmpeg<7
+  - pytorch
+  - torchvision
+  - torchaudio
+  - numpy<2
+  - pip
+  - pip:
+      - diffusers==0.18.2
+      - xformers==0.0.21
+      - transformers==4.30.1
+      - einops
+      - pytorch_lightning
+      - omegaconf
+      - spaces
+      - gradio
+      - huggingface-hub==0.25.1
+      - librosa
+      - opencv-python
+      - progressbar
+      - wandb
+
