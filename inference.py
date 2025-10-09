@@ -27,7 +27,7 @@ current_time = get_current_time()
 trial_name = f"{cfgs.wandb_name}-{current_time}"
 output_dir = os.path.join(cfgs.output_dir, trial_name)
 os.makedirs(output_dir, exist_ok=True)
-shutil.copyfile("scripts/run.sh", os.path.join(output_dir, "trial.sh"))
+# shutil.copyfile("scripts/run.sh", os.path.join(output_dir, "trial.sh"))
 dump_config(cfgs, dump_path=os.path.join(output_dir, "trial_config.yaml"))
 log.info(f"Set the output of the trial to {output_dir}")
 
@@ -56,19 +56,19 @@ wandb_run = wandb.init(
 model = AudioMorphix(
     pretrained_model_path=cfgs.model,
     num_ddim_steps=cfgs.task.num_ddim_steps,
-    )
+)
 
 fbank_bg, log_stft_bg, wav_bg = model.editor.get_fbank(
-    cfgs.task.background_audio_filepath, 
+    cfgs.task.background_audio_filepath,
     cfgs.audio_processor,
     return_intermediate=True,
-    )
-    
+)
+
 fbank_fg, log_stft_fg, wav_fg = model.editor.get_fbank(
-    cfgs.task.foreground_audio_filepath, 
+    cfgs.task.foreground_audio_filepath,
     cfgs.audio_processor,
     return_intermediate=True,
-    )
+)
 
 fbank_fg_ori = fbank_fg
 
@@ -78,8 +78,11 @@ mask_bg[cfgs.task.t_on : cfgs.task.t_off, cfgs.task.f_low : cfgs.task.f_up] = 1
 
 # Create a mask fg with scaling operation
 mask_fg = get_edit_mask(
-    mask_bg, dx=cfgs.task.df, dy=cfgs.task.dt, 
-    resize_scale_x=cfgs.task.resize_scale_f, resize_scale_y=cfgs.task.resize_scale_t,
+    mask_bg,
+    dx=cfgs.task.df,
+    dy=cfgs.task.dt,
+    resize_scale_x=cfgs.task.resize_scale_f,
+    resize_scale_y=cfgs.task.resize_scale_t,
 )
 
 if cfgs.task.task == "paste":
@@ -99,7 +102,7 @@ if cfgs.task.task == "paste":
         w_content=cfgs.task.w_content,  # 5
         SDE_strength=cfgs.task.sde_strength,
         seed=cfgs.seed,
-        save_kv=(not cfgs.task.disable_kv_cache), # True,
+        save_kv=(not cfgs.task.disable_kv_cache),  # True,
         disable_tangent_proj=cfgs.task.disable_tangent_proj,
     )
 elif cfgs.task.task == "mix":
@@ -119,7 +122,7 @@ elif cfgs.task.task == "mix":
         w_content=cfgs.task.w_content,
         SDE_strength=cfgs.task.sde_strength,
         seed=cfgs.seed,
-        save_kv=(not cfgs.task.disable_kv_cache), # True,
+        save_kv=(not cfgs.task.disable_kv_cache),  # True,
         disable_tangent_proj=cfgs.task.disable_tangent_proj,
     )
 elif cfgs.task.task == "remove":
@@ -140,7 +143,7 @@ elif cfgs.task.task == "remove":
         w_content=cfgs.task.w_content,
         SDE_strength=cfgs.task.sde_strength,
         seed=cfgs.seed,
-        save_kv=(not cfgs.task.disable_kv_cache), # True,
+        save_kv=(not cfgs.task.disable_kv_cache),  # True,
         bg_to_fg_ratio=0.5,
         iterations=50,
         enable_penalty=True,
@@ -163,7 +166,7 @@ elif cfgs.task.task == "generate":
         w_content=cfgs.task.w_content,
         SDE_strength=0,
         seed=cfgs.seed,
-        save_kv=(not cfgs.task.disable_kv_cache), # True,
+        save_kv=(not cfgs.task.disable_kv_cache),  # True,
         disable_tangent_proj=cfgs.task.disable_tangent_proj,
     )
 elif cfgs.task.task == "style_transfer":
@@ -183,16 +186,24 @@ elif cfgs.task.task == "style_transfer":
         w_content=cfgs.task.w_content,
         SDE_strength=0,
         seed=cfgs.seed,
-        save_kv=(not cfgs.task.disable_kv_cache), # True,
+        save_kv=(not cfgs.task.disable_kv_cache),  # True,
         disable_tangent_proj=cfgs.task.disable_tangent_proj,
     )
 elif cfgs.task.task == "move_and_resize":
-    if (cfgs.task.t_on_keep is None) or (cfgs.task.t_off_keep is None) or (cfgs.task.f_low_keep is None) or (cfgs.task.f_up_keep is None):
+    if (
+        (cfgs.task.t_on_keep is None)
+        or (cfgs.task.t_off_keep is None)
+        or (cfgs.task.f_low_keep is None)
+        or (cfgs.task.f_up_keep is None)
+    ):
         mask_keep = None
     else:
         mask_keep = torch.zeros_like(fbank_bg)
         mask_keep = mask_keep.squeeze()
-        mask_keep[int(cfgs.task.t_on_keep):int(cfgs.task.t_off_keep), int(cfgs.task.f_low_keep):int(cfgs.task.f_up_keep)] = 1
+        mask_keep[
+            int(cfgs.task.t_on_keep) : int(cfgs.task.t_off_keep),
+            int(cfgs.task.f_low_keep) : int(cfgs.task.f_up_keep),
+        ] = 1
 
     result = model.run_move(
         fbank_org=fbank_bg,
@@ -237,11 +248,16 @@ wandb.log(
             sample_rate=cfgs.audio_processor.sampling_rate,
         ),
         "background_spec": wandb.Image(
-            plot_spectrogram(fbank_bg.permute(0, 2, 1)[:,:,:10*n_sample_per_sec]), # discard padding area
+            plot_spectrogram(
+                fbank_bg.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec]
+            ),  # discard padding area
             caption=cfgs.task.background_audio_caption,
         ),
         "background_mask": wandb.Image(
-            plot_spectrogram(mask_bg.permute(1, 0)[:,:10*n_sample_per_sec], auto_amp=True), caption="Mask of background sound"
+            plot_spectrogram(
+                mask_bg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
+            ),
+            caption="Mask of background sound",
         ),
         "foreground_wav": wandb.Audio(
             wav_fg.cpu().squeeze().numpy(),
@@ -249,11 +265,17 @@ wandb.log(
             sample_rate=cfgs.audio_processor.sampling_rate,
         ),
         "foreground_spec": wandb.Image(
-            plot_spectrogram(fbank_fg_ori.permute(0, 2, 1)[:,:,:10*n_sample_per_sec], filename="out.png"),
+            plot_spectrogram(
+                fbank_fg_ori.permute(0, 2, 1)[:, :, : 10 * n_sample_per_sec],
+                filename="out.png",
+            ),
             caption=cfgs.task.foreground_audio_caption,
         ),
         "foreground_mask": wandb.Image(
-            plot_spectrogram(mask_fg.permute(1, 0)[:,:10*n_sample_per_sec], auto_amp=True), caption="Mask of foreground sound"
+            plot_spectrogram(
+                mask_fg.permute(1, 0)[:, : 10 * n_sample_per_sec], auto_amp=True
+            ),
+            caption="Mask of foreground sound",
         ),
         "generated_wav": wandb.Audio(
             edited_wav,
@@ -261,7 +283,11 @@ wandb.log(
             sample_rate=cfgs.audio_processor.sampling_rate,
         ),
         "generated_spec": wandb.Image(
-            plot_spectrogram(result.mel_spectrogram.permute(0, 1, 3, 2)[:,:,:,:10*n_sample_per_sec]),
+            plot_spectrogram(
+                result.mel_spectrogram.permute(0, 1, 3, 2)[
+                    :, :, :, : 10 * n_sample_per_sec
+                ]
+            ),
             caption="After adding foreground sound.",
         ),
     }
