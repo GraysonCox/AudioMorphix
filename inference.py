@@ -32,25 +32,25 @@ dump_config(cfgs, dump_path=os.path.join(output_dir, "trial_config.yaml"))
 log.info(f"Set the output of the trial to {output_dir}")
 
 # Setup Wandb
-wandb.login(key=os.environ["WANDB_API_KEY"])
-wandb_tags = [
-    f"guidance_scale: {cfgs.task.guidance_scale}",
-    f"energy_scale: {cfgs.task.energy_scale}",
-    f"w_edit: {cfgs.task.w_edit}",
-    f"w_content: {cfgs.task.w_content}",
-    f"sde_strength: {cfgs.task.sde_strength}",
-]
-wandb_run = wandb.init(
-    project="eval_AudioMorphix",
-    name=trial_name,
-    group=cfgs.wandb_group,
-    tags=wandb_tags,
-    mode="disabled" if cfgs.wandb_disable else "online",
-    settings=wandb.Settings(_disable_stats=True),
-    job_type=cfgs.task.task,
-    config=OmegaConf.to_object(cfgs),
-    dir=output_dir,
-)
+# wandb.login(key=os.environ["WANDB_API_KEY"])
+# wandb_tags = [
+#     f"guidance_scale: {cfgs.task.guidance_scale}",
+#     f"energy_scale: {cfgs.task.energy_scale}",
+#     f"w_edit: {cfgs.task.w_edit}",
+#     f"w_content: {cfgs.task.w_content}",
+#     f"sde_strength: {cfgs.task.sde_strength}",
+# ]
+# wandb_run = wandb.init(
+#     project="eval_AudioMorphix",
+#     name=trial_name,
+#     group=cfgs.wandb_group,
+#     tags=wandb_tags,
+#     mode="disabled" if cfgs.wandb_disable else "online",
+#     settings=wandb.Settings(_disable_stats=True),
+#     job_type=cfgs.task.task,
+#     config=OmegaConf.to_object(cfgs),
+#     dir=output_dir,
+# )
 
 
 model = AudioMorphix(
