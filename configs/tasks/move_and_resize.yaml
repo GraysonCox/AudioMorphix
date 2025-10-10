@@ -1,10 +1,10 @@
 task: 'move_and_resize'
 
-background_audio_filepath: '/path/to/dataset/add/source/72.wav'
-background_audio_caption: 'bell'
-foreground_audio_filepath: '/path/to/foreground_sound'
-foreground_audio_caption: 'prompt for foreground sound'
-output_audio_filepath: null
+background_audio_filepath: ../Change.wav
+background_audio_caption: A three-piece rock band with one male vocalist
+foreground_audio_filepath: ../Change.wav
+foreground_audio_caption: A three-piece rock band with one male vocalist
+output_audio_filepath: .
 
 # mask_bg[t_on:t_off, f_low:f_up]=1
 t_on: 0
@@ -26,7 +26,7 @@ f_up_keep: null
 
 dt: 200
 df: 0
-resize_scale_t: 1.0
+resize_scale_t: 0.95
 resize_scale_f: 1.0
 guidance_scale: 1.2
 energy_scale: 1.5
