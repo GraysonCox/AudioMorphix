@@ -26,7 +26,7 @@ f_up_keep: null
 
 dt: 200
 df: 0
-resize_scale_t: 1.0
+resize_scale_t: 0.95
 resize_scale_f: 1.0
 guidance_scale: 1.2
 energy_scale: 1.5
